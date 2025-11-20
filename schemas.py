@@ -12,31 +12,48 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
-# Example schemas (replace with your own):
+# SaaS: Email breach checker schemas
 
+class Breach(BaseModel):
+    name: str = Field(..., description="Breach name")
+    domain: Optional[str] = Field(None, description="Domain affected")
+    breachDate: Optional[str] = Field(None, description="Date of breach (YYYY-MM-DD)")
+    addedDate: Optional[str] = Field(None, description="Date added to database")
+    pwnCount: Optional[int] = Field(None, description="Number of accounts affected")
+    description: Optional[str] = Field(None, description="Description of the breach")
+    dataClasses: Optional[List[str]] = Field(default_factory=list, description="Types of data exposed")
+    isVerified: Optional[bool] = Field(None, description="Verified by source")
+
+class Check(BaseModel):
+    """
+    Email breach check records
+    Collection name: "check"
+    """
+    email: str = Field(..., description="Email address checked")
+    found: bool = Field(False, description="Whether any breaches were found")
+    count: int = Field(0, description="Number of breaches found")
+    breaches: List[Breach] = Field(default_factory=list, description="List of breaches (if any)")
+    source: str = Field("hibp", description="Source used for lookup")
+    is_demo: bool = Field(False, description="True if using demo/mock data")
+    checked_at: datetime = Field(default_factory=datetime.utcnow, description="When the check occurred")
+
+# Example schemas kept for reference (not used by app)
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    name: str
+    email: str
+    address: str
+    age: Optional[int] = None
+    is_active: bool = True
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    title: str
+    description: Optional[str] = None
+    price: float
+    category: str
+    in_stock: bool = True
 
 # Add your own schemas here:
 # --------------------------------------------------
